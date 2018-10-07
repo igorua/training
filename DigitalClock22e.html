@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="Graphical Digital Clock">
+    <meta name="keywords" content="digital,clock,time,space,universe,graphic,vector">
+    <meta name="author" content="Alex Dulov">
+    <title>Digital Clock</title>
+    <style type="text/css">
+      body {
+        background-color: #000000;
+        width:  100%;
+        height: 100%;
+        margin: 0px;
+        border: 0;
+        overflow: hidden;
+        display: block; 
+      }
+      canvas {
+        background-color: #000000;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        position: absolute;
+        display: block;
+      }
+    </style>
+    <script type="text/javascript">
+      // Functions
+    </script>
+  </head>
+<body>
+<canvas id="canvas"></canvas>
+<script type="text/javascript">
+
+// ==================================================================
+//  DIGITAL CLOCK
+//      
+//  Description: Digital clock whith customized parameters and 
+//  univers on background
+//  Autor: Alex Dulov
+//  Release: 2018
+//  Spetial Thanks: Anton Dulov
+//
+// ==================================================================
+
+
+
+// ------------------------------------------------------------------
+//	VARIABLES
+// ------------------------------------------------------------------
+
+// Canvas creation
+var canvas = document.getElementById('canvas'),
+    ctx = canvas.getContext('2d');
+    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
+
+// Definition of the screen center
+var screenCenterX = window.innerWidth / 2,
+    screenCenterY = window.innerHeight / 2,
+
+// Custom parameters (font)
+    sizeClockFactor = 1,
+    angleFactor = 5, // 5
+    charUnitFactor = 500,
+    charScaleYFactor = 0, // 0
+    charWidthFactor = 0, // -20
+    charSpaceFactor = 10, // 10
+    hatchWidthFactor = 0, // 0
+    hatchSpaceFactor = 15, // 15
+    hatchMidFactor = 0, // 0 - center position
+
+// Custom time & date parameters (clock standards)
+    firsWeekDay = 0, // 0
+    timeStandard = 1, // 1
+    dotsStyle = 3, // 3
+    monthStandard = 0, // 0
+    monthLetter = 1, // 1
+    yearStandard = 1, // 1
+    secondsStyle = 1, // 1
+    alarmClock = 0, // 0
+
+// Color parameters
+    colorFactor = [0, 255, 0],
+    alphaFactor = 0.75, // 1.00
+    colorLight = 'rgba(' + 
+      colorFactor[0] + ', ' + 
+      colorFactor[1] + ', ' + 
+      colorFactor[2] + ', ' + 
+      alphaFactor + ')',
+    colorDim = 'rgba(' + 
+      colorFactor[0] + ', ' + 
+      colorFactor[1] + ', ' + 
+      colorFactor[2] + ', ' + 
+      alphaFactor / 3 + ')',
+    colorDark = 'rgba(' + 
+      colorFactor[0] + ', ' + 
+      colorFactor[1] + ', ' + 
+      colorFactor[2] + ', ' + 
+      alphaFactor / 9 + ')',
+    backgroundColor = 'rgba(0, 0, 0, 1)',
+    blinkColor = colorLight,
+    customColor = colorLight,
+    htcColor = colorDark,
+
+// Math
+    goldenRatio = (Math.sqrt(5) - 1) / 2,
+    angle = Math.tan ((-90 - angleFactor) * Math.PI / 180), 
+
+// Font parameters
+    chrSizeBig = 0,
+    chrSizeMid = 0,
+    chrSizeSmall = 0,
+    charSpace = 0,
+    chrWidth = 0,
+    chrArr = [],
+    //chrPos = 0,
+
+// Character parameters
+    hatchSpace = 0,
+    hatchWidth = 0,
+    chrCode = [],
+    maxHatch = 9,
+    maxPoint = 6,
+    crdX = [], 
+    crdY = [],
+    fctY0 = [[], [], [], [], [], [], [], [], []], 
+    fctY1 = [[], [], [], [], [], [], [], [], []], 
+    fctY2 = [[], [], [], [], [], [], [], [], []],
+    fctY3 = [[], [], [], [], [], [], [], [], []],
+    fctX0 = [[], [], [], [], [], [], [], [], []], 
+    fctX1 = [[], [], [], [], [], [], [], [], []], 
+    fctX2 = [[], [], [], [], [], [], [], [], []], 
+    fctX3 = [[], [], [], [], [], [], [], [], []],
+
+// Clock data
+    today = new Date(),
+    year = 0, 
+    yearString = '',
+    monthes = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+    month = 0, 
+    monthString = '',
+    day = 0, 
+    dayString = '',
+    weekDay = today.getDay(),
+    weekDays = '= MON TUE WED THU FRI SAT SUN *',
+    weekDayAlpha = colorDark,
+    hours = 0, 
+    hoursString = '',
+    midDay = 'AM';
+    minutes = 0, 
+    minutesString = '',
+    seconds = 0,
+    secondsString = '',
+    clockDrawData = [],
+    strData = '',
+
+// Mouse events
+
+
+
+// Other variables
+    i = 0,
+    j = 0;
+
+/*
+console.log('Screen: X = ' + window.innerWidth + ', Y = ' + window.innerHeight + '; Screen center: X/2 = ' + screenCenterX + ', Y/2 = ' + screenCenterY + ';');
+console.log('Golden Ratio = ' + goldenRatio + '; Angle in degrees = ' + angleFactor + ';');
+console.log('Font sizes: Big = ' + chrSizeBig + ', Middle = ' + chrSizeMid + ', Small = ' + chrSizeSmall + ';');
+console.log(colorLight);
+*/
+
+
+// Сделать смещение каналов 
+
+
+
+// ------------------------------------------------------------------
+//	START
+// ------------------------------------------------------------------
+
+// ------------------------------------------------------------------
+// Fullscreen functions
+
+/*
+function launchFullScreen(element) {
+ if(element.requestFullScreen) {
+  element.requestFullScreen();
+ } else if(element.mozRequestFullScreen) {
+  element.mozRequestFullScreen();
+ } else if(element.webkitRequestFullScreen) {
+  element.webkitRequestFullScreen();
+ }
+}
+
+function cancelFullScreen() {
+ if(document.cancelFullScreen) {
+  document.cancelFullScreen();
+ } else if(document.mozCancelFullScreen) {
+  document.mozCancelFullScreen();
+ } else if(document.webkitCancelFullScreen) {
+  document.webkitCancelFullScreen();
+ }
+}
+
+*/
+
+
+
+// ------------------------------------------------------------------
+//	CLEAR SCREEN
+// ------------------------------------------------------------------
+
+var clearScreen = function () {
+  ctx.clearRect(0, 0,  window.innerWidth, window.innerHeight);
+};
+
+
+
+// ------------------------------------------------------------------
+//	RELOAD VARIABLES
+// ------------------------------------------------------------------
+
+var reloadVariables = function () {
+
+// Screen parameters
+  ctx.canvas.width  = window.innerWidth;
+  ctx.canvas.height = window.innerHeight;
+  screenCenterX = window.innerWidth / 2;
+  screenCenterY = window.innerHeight / 2;
+
+// Font sizes
+    chrSizeBig = (screenCenterX + screenCenterY) / 4 * sizeClockFactor;
+    chrSizeMid = chrSizeBig / 2.5;
+    chrSizeSmall = chrSizeBig / 5.5;
+
+// Clock data reload
+    today = new Date();
+    year = today.getFullYear(); 
+    yearString = year + '';
+    month = today.getMonth() + 1; 
+    monthString = month + '';
+    day = today.getDate(); 
+    dayString = day + '';
+    weekDay = today.getDay();
+    hours = today.getHours(); 
+    hoursString = hours + '';
+    minutes = today.getMinutes(); 
+    minutesString = minutes + '';
+    seconds = today.getSeconds();
+    secondsString = seconds + '';
+
+    if (dayString.length == 1) dayString = '0' + dayString;
+    if (monthString.length == 1) monthString = '0' + monthString;
+
+};
+
+
+
+// ------------------------------------------------------------------
+//	CHARACTER WIDTH
+// ------------------------------------------------------------------
+
+var charWidth = function (fontSize) {
+  chrWidth =  fontSize / 9 * 5 + 
+    charScaleYFactor * (fontSize / 9 * 5) / 200;
+return chrWidth;
+};
+
+
+// ------------------------------------------------------------------
+//	DRAWING A CHARACTER
+// ------------------------------------------------------------------
+
+var chrDraw = function (
+      chrValue, 
+      chrCrdX, 
+      chrCrdY, 
+      chrSize, 
+      chrAlpha,
+      chrBlink) {
+
+  unit = charWidth (chrSize) / charUnitFactor;
+  hatchSpace = unit * hatchSpaceFactor;
+  hatchWidth = unit * hatchWidthFactor;
+  hatchMidPos = unit * hatchMidFactor * 2;
+
+  htcColor = colorDark;		// <-- Уточнить цвет. Не совсем корректно, ведь нужна только прозрачность. Может сделать отдельную функцию для вычисления цвета.
+
+
+  chrCode = [-1, 1, 1, 1, 1, 1, 1, 1, 1];  // Unknown character
+  
+  if (chrValue == '0') 
+    chrCode = [1, 1, 1, 1, 1, 0, 1, 0, 0]; // '0' = ' ' !!!
+  if (chrValue == '1') 
+    chrCode = [0, 1, 0, 1, 0, 0, 0, 0, 0];
+  if (chrValue == '2') 
+    chrCode = [0, 1, 1, 0, 1, 1, 1, 0, 0];
+  if (chrValue == '3') 
+    chrCode = [0, 1, 0, 1, 1, 1, 1, 0, 0];
+  if (chrValue == '4') 
+    chrCode = [1, 1, 0, 1, 0, 1, 0, 0, 0];
+  if (chrValue == '5') 
+    chrCode = [1, 0, 0, 1, 1, 1, 1, 0, 0];
+  if (chrValue == '6') 
+    chrCode = [1, 0, 1, 1, 1, 1, 1, 0, 0];
+  if (chrValue == '7') 
+    chrCode = [0, 1, 0, 1, 1, 0, 0, 0, 0];
+  if (chrValue == '8') 
+    chrCode = [1, 1, 1, 1, 1, 1, 1, 0, 0];
+  if (chrValue == '9') 
+    chrCode = [1, 1, 0, 1, 1, 1, 1, 0, 0];
+  
+  if (chrValue == 'A' || chrValue == 'a') 
+    chrCode = [1, 1, 1, 1, 1, 1, 0, 0, 0];
+  if (chrValue == 'B' || chrValue == 'b') 
+    chrCode = [1, 0, 1, 1, 0, 1, 1, 1, 0];
+  if (chrValue == 'C' || chrValue == 'c') 
+    chrCode = [1, 0, 1, 0, 1, 0, 1, 0, 0];
+  if (chrValue == 'D' || chrValue == 'd') 
+    chrCode = [1, 0, 1, 1, 0, 0, 1, 1, 0];
+  if (chrValue == 'E' || chrValue == 'e') 
+    chrCode = [1, 0, 1, 0, 1, 1, 1, 0, 0];
+  if (chrValue == 'F' || chrValue == 'f') 
+    chrCode = [1, 0, 1, 0, 1, 1, 0, 0, 0];
+  if (chrValue == 'G' || chrValue == 'g') 
+    chrCode = [1, 0, 1, 1, 1, 0, 1, 0, 1];
+  if (chrValue == 'H' || chrValue == 'h') 
+    chrCode = [1, 1, 1, 1, 0, 1, 0, 0, 0];
+  if (chrValue == 'I' || chrValue == 'i') 
+    chrCode = [0, 1, 0, 1, 0, 0, 0, 0, 0];
+  if (chrValue == 'J' || chrValue == 'j') 
+    chrCode = [0, 1, 1, 1, 0, 0, 1, 0, 0];
+  if (chrValue == 'K' || chrValue == 'k') 
+    chrCode = [1, 1, 1, 0, 0, 1, 0, 0, 1];
+  if (chrValue == 'L' || chrValue == 'l') 
+    chrCode = [1, 0, 1, 0, 0, 0, 1, 0, 0];
+  if (chrValue == 'M' || chrValue == 'm') 
+    chrCode = [1, 1, 1, 1, 1, 0, 0, 1, 0];
+  if (chrValue == 'N' || chrValue == 'n') 
+    chrCode = [1, 1, 1, 1, 0, 0, 0, 1, 0];
+  if (chrValue == 'O' || chrValue == 'o') 
+    chrCode = [1, 1, 1, 1, 1, 0, 1, 0, 0];
+  if (chrValue == 'P' || chrValue == 'p') 
+    chrCode = [1, 1, 1, 0, 1, 1, 0, 0, 0];
+  if (chrValue == 'Q' || chrValue == 'q') 
+    chrCode = [1, 1, 1, 1, 1, 0, 1, 0, 1];
+  if (chrValue == 'R' || chrValue == 'r') 
+    chrCode = [1, 1, 1, 0, 1, 1, 0, 0, 1];
+  if (chrValue == 'S' || chrValue == 's') 
+    chrCode = [1, 0, 0, 1, 1, 1, 1, 0, 0];
+  if (chrValue == 'T' || chrValue == 't') 
+    chrCode = [0, 0, 0, 1, 1, 0, 0, 1, 0];
+  if (chrValue == 'U' || chrValue == 'u') 
+    chrCode = [1, 1, 1, 1, 0, 0, 1, 0, 0];
+  if (chrValue == 'V' || chrValue == 'v') 
+    chrCode = [1, 1, 0, 1, 0, 0, 0, 0, 1];
+  if (chrValue == 'W' || chrValue == 'w') 
+    chrCode = [1, 1, 1, 1, 0, 0, 1, 0, 1];
+  if (chrValue == 'X' || chrValue == 'x') 
+    chrCode = [0, 1, 1, 0, 0, 1, 0, 1, 1];
+  if (chrValue == 'Y' || chrValue == 'y') 
+    chrCode = [1, 1, 0, 1, 0, 1, 1, 0, 0];
+  if (chrValue == 'Z' || chrValue == 'z') 
+    chrCode = [0, 1, 1, 0, 1, 1, 1, 0, 0];
+  
+  if (chrValue == '_') 
+    chrCode = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // Space
+  if (chrValue == '.') 
+    chrCode = [0, 0, 0, 0, 0, 0, 1, 0, 0]; // Underline
+  if (chrValue == '-') 
+    chrCode = [0, 0, 0, 0, 0, 1, 0, 0, 0];
+  if (chrValue == '=') 
+    chrCode = [0, 0, 0, 0, 1, 1, 1, 0, 0]; // Menu
+  if (chrValue == '$') 
+    chrCode = [1, 0, 0, 1, 1, 1, 1, 1, 1];
+  if (chrValue == '(') 
+    chrCode = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+  if (chrValue == ')') 
+    chrCode = [0, 0, 0, 1, 0, 0, 1, 1, 0];
+  if (chrValue == '"') 
+    chrCode = [1, 1, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == '`') 
+    chrCode = [0, 0, 0, 0, 0, 0, 0, 1, 0];
+  if (chrValue == '?') 
+    chrCode = [0, 1, 1, 0, 1, 1, 0, 0, 0];
+
+  if (chrValue == '#') 
+    chrCode = [1, 1, 1, 1, 1, 1, 1, 1, 1]; // All hatches is light
+  if (chrValue == '!') 
+    chrCode = [-1, 0, 0, 0, 0, 0, 0, 0, 0]; // Emptiness
+
+  if (chrValue == '/') 
+    chrCode = [2, 0, 0, 0, 0, 0, 0, 0, 0]; // Slash
+  if (chrValue == ':') 
+    chrCode = [3, 1, -1, -1, -1, -1, -1, -1, -1]; // Dots
+  if (chrValue == '^') 
+    chrCode = [4, 1, -1, -1, 1, 1, -1, -1, -1];
+  if (chrValue == '*') 
+    chrCode = [5, 1, 0, 0, 0, 0, 0, 0, 0]; // Cross
+  if (chrValue == '%') 
+    chrCode = [6, 1, 0, 0, 0, 0, 0, 0, 0]; // Battery
+  if (chrValue == '@') 
+    chrCode = [7, 1, 1, 1, 1, 1, 0, 0, 0]; // Bell
+  if (chrValue == '<') 
+    chrCode = [8, 0, 0, 0, 0, 0, 0, 0, 0]; // <--
+  if (chrValue == '>') 
+    chrCode = [9, 0, 0, 0, 0, 0, 0, 0, 0]; // -->
+
+
+// Reserved symbols
+/*
+  if (chrValue == ';') 
+    chrCode = [8, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == '+') 
+    chrCode = [9, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == '|') 
+    chrCode = [10, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == '\') 
+    chrCode = [11, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == '~') 
+    chrCode = [12, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == ',') 
+    chrCode = [13, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == '[') 
+    chrCode = [14, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == ']') 
+    chrCode = [15, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == '{') 
+    chrCode = [19, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (chrValue == '}') 
+    chrCode = [20, 0, 0, 0, 0, 0, 0, 0, 0];
+*/
+
+
+  if (chrCode[0] != -1) {
+
+    if (chrCode[0] == 0 || chrCode[0] == 1 || chrCode[0] == 4) {
+      maxHatch = 9; maxPoint = 6; 
+
+// ------------------------------------------------------------------
+// Types of strokes (hatches):
+//  Vertical: Top (Left - 0, Right - 1), Bottom (Left - 2, Right - 3)
+//  Horizontal: Top - 4, Middle - 5, Bottom - 6
+//  Diagonal: Top - 7, Bottom - 8
+// ------------------------------------------------------------------
+
+// Vertical Top Left Hatch
+  fctY0 [0] = [9, 10, 16, 17, 16, 10];
+  fctY1 [0] = [0, -0.5, 1, 0.5, 1, -0.5];
+  fctY2 [0] = [-1, -1, 1, 1, 1, -1];
+  fctY3 [0] = [1, 1, 0, 0, 0, 1];
+  fctX0 [0] = [1, 2, 2, 1, 0, 0];
+  fctX1 [0] = [0.5, 1, 1, 0.5, 0, 0];
+  fctX2 [0] = [0, 0, 0, 0, 0, 0];
+  fctX3 [0] = fctX2 [0];
+
+// Vertical Top Right Hatch
+  fctY0 [1] = fctY0 [0];
+  fctY1 [1] = fctY1 [0];
+  fctY2 [1] = fctY2 [0];
+  fctY3 [1] = fctY3 [0];
+  fctX0 [1] = [9, 8, 8, 9, 10, 10];
+  fctX1 [1] = [-0.5, -1, -1, -0.5, 0, 0];
+  fctX2 [1] = fctX2 [0];
+  fctX3 [1] = [1, 1, 1, 1, 1, 1];
+
+// Vertical Bottom Left Hatch
+  fctY0 [2] = [1, 2, 8, 9, 8, 2];
+  fctY1 [2] = [-0.5, -1, 0.5, 0, 0.5, -1];
+  fctY2 [2] = fctY2 [0];
+  fctY3 [2] = [0, 0, 1, 1, 1, 0];
+  fctX0 [2] = fctX0 [0];
+  fctX1 [2] = fctX1 [0];
+  fctX2 [2] = fctX2 [0];
+  fctX3 [2] = fctX2 [0];
+
+// Vertical Bottom Right Hatch
+  fctY0 [3] = fctY0 [2];
+  fctY1 [3] = fctY1 [2];
+  fctY2 [3] = fctY2 [0];
+  fctY3 [3] = fctY3 [2];
+  fctX0 [3] = fctX0 [1];
+  fctX1 [3] = fctX1 [1];
+  fctX2 [3] = fctX2 [0];
+  fctX3 [3] = fctX3 [1];
+
+// Horizontal Top Hatch
+  fctY0 [4] = [17, 18, 18, 17, 16, 16];
+  fctY1 [4] = [0.5, 0, 0, 0.5, 1, 1];
+  fctY2 [4] = fctX2 [0];
+  fctY3 [4] = fctX2 [0];
+  fctX0 [4] = fctY0 [2];
+  fctX1 [4] = [0.5, 1, -1, -0.5, -1, 1];
+  fctX2 [4] = [1, 1, -1, -1, -1, 1];
+  fctX3 [4] = [0, 0, 1, 1, 1, 0];
+
+// Horizontal Middle Hatch
+  fctY0 [5] = [9, 10, 10, 9, 8, 8];
+  fctY1 [5] = [0, -0.5, -0.5, 0, 0.5, 0.5];
+  fctY2 [5] = fctX2 [0];
+  fctY3 [5] = [1, 1, 1, 1, 1, 1];
+  fctX0 [5] = fctY0 [2];
+  fctX1 [5] = fctX1 [4];
+  fctX2 [5] = fctX2 [4];
+  fctX3 [5] = fctX3 [4];
+
+// Horizontal Bottom Hatch
+  fctY0 [6] = [1, 0, 0, 1, 2, 2];
+  fctY1 [6] = [-0.5, 0, 0, -0.5, -1, -1];
+  fctY2 [6] = fctX2 [0];
+  fctY3 [6] = fctX2 [0];
+  fctX0 [6] = fctY0 [2];
+  fctX1 [6] = fctX1 [4];
+  fctX2 [6] = fctX2 [4];
+  fctX3 [6] = fctX3 [4];
+
+// Diagonal Top Hatch
+  fctY0 [7] = [16, 16, 11.4, 10, 10, 14.6];
+  fctY1 [7] = [1, 1, -1.2, -0.5, -0.5, 1.7];
+  fctY2 [7] = [1.4, 1.4, -1.4, -1.4, -1.4, 1.4];
+  fctY3 [7] = fctY3 [2];
+  fctX0 [7] = [2, 3.4, 8, 8, 6.6, 2];
+  fctX1 [7] = [1, 1.7, -1, -1, -1.7, 1];
+  fctX2 [7] = fctY2 [7];
+  fctX3 [7] = fctX3 [4];
+
+// Diagonal Bottom Hatch
+  fctY0 [8] = [8, 8, 3.4, 2, 2, 6.6];
+  fctY1 [8] = [0.5, 0.5, -1.7, -1, -1, 1.2];
+  fctY2 [8] = fctY2 [7];
+  fctY3 [8] = fctY3 [0];
+  fctX0 [8] = fctX0 [7];
+  fctX1 [8] = fctX1 [7];
+  fctX2 [8] = fctY2 [7];
+  fctX3 [8] = fctX3 [4];
+
+    };
+
+
+// ------------------------------------------------------------------
+// Slash
+  if (chrCode[0] == 2) {
+      maxHatch = 1; maxPoint = 4; 
+
+      fctY0 [0] = [-4, -4, 22, 22];
+      fctY1 [0] = [0, 0, 0, 0];
+      fctY2 [0] = [0, 0, 0, 0];
+      fctY3 [0] = [0, 0, 0, 0];
+      //fctX0 [0] = [0, 1.4, 10, 8.6];
+      fctX0 [0] = [1, 2.4, 9, 7.6];
+      fctX1 [0] = [0, 1, 0, -1];
+      fctX2 [0] = [0, 0, 0, 0];
+      fctX3 [0] = [0, 0, 1, 1];
+    };
+
+
+// ------------------------------------------------------------------
+// Dots
+    if (chrCode[0] == 3) {
+      maxHatch = 2; maxPoint = 6; 
+// Dot Bottom
+      fctY0 [0] = [1, 2, 3.2, 4.2, 3.2, 2];
+      fctY1 [0] = [0, -0.5, 1, 0.5, 1, -0.5];
+      fctY2 [0] = [0, 0, 0, 0, 0, 0];
+      fctY3 [0] = [0, 0, 0.5, 0.5, 0.5, 0];
+      fctX0 [0] = [5, 6, 6, 5, 4, 4];
+      fctX1 [0] = [0, 0.5, 0.5, 0, -0.5, -0.5];
+      fctX2 [0] = fctY2 [0];
+      fctX3 [0] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
+// Dot Top
+      fctY0 [1] = [5.8, 6.8, 8, 9, 8, 6.8];
+      fctY1 [1] = [-0.5, -1, 0.5, 0, 0.5, -1];
+      fctY2 [1] = fctY2 [0];
+      fctY3 [1] = [0.5, 0.5, 1, 1, 1, 0.5];
+      fctX0 [1] = [5, 6, 6, 5, 4, 4];
+      fctX1 [1] = [0, 0.5, 0.5, 0, -0.5, -0.5];
+      fctX2 [1] = fctY2 [0];
+      fctX3 [1] = fctX3 [0];
+    };
+
+
+
+
+// ------------------------------------------------------------------
+// Cross
+    if (chrCode[0] == 5) {
+      maxHatch = 1; maxPoint = 16; 
+
+      fctY0 [0] = [17, 17, 14.2, 17, 17, 15.8, 13, 10.2, 
+                   9, 9, 11.8, 9, 9, 10.2, 13, 15.8];
+      fctY1 [0] = [0, 0, -0.5, 0, 0, 0.5, 0, -0.5, 
+                   0, 0, 0.5, 0, 0, -0.5, 0, 0.5];
+      fctY2 [0] = [1, 1, 0, 1, 1, 1, 0, -1, 
+                   -1, -1, 0, -1, -1, -1, 0, 1];
+      fctY3 [0] = [0, 0, 0.5, 0, 0, 0, 0.5, 1, 
+                   1, 1, 0.5, 1, 1, 1, 0.5, 0];
+      fctX0 [0] = [1, 2.2, 5, 7.8, 9, 9, 6.2, 9, 
+                   9, 7.8, 5, 2.2, 1, 1, 3.8, 1];
+      fctX1 [0] = [0, 0.5, 0, -0.5, 0, 0, 0.5, 0, 
+                   0, -0.5, 0, 0.5, 0, 0, -0.5, 0];
+      fctX2 [0] = [1, 1, 0, -1, -1, -1, 0, -1, 
+                   -1, -1, 0, 1, 1, 1, 0, 1];
+      fctX3 [0] = [0, 0, 0.5, 1, 1, 1, 0.5, 1, 
+                   1, 1, 0.5, 0, 0, 0, 0.5, 0];
+    };
+
+
+// ------------------------------------------------------------------
+// Battery
+    if (chrCode[0] == 6) {
+      maxHatch = 2; maxPoint = 12; 
+
+  fctY0 [0] = [2, 0, 0, 2, 15, 17, 17, 18, 18, 17, 17, 15];  // crd Y
+  fctY1 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+  fctY2 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+  fctY3 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Middle Position
+  fctX0 [0] = [0, 2, 8, 10, 10, 8, 6.2, 6.2, 3.8, 3.8, 2, 0];  // crd X
+  fctX1 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+  fctX2 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+  fctX3 [0] = [0, 0, 1, 1, 1, 1, 0.7, 0.7, 0.3, 0.3, 0, 0];  // char Width Factor
+
+  fctY0 [1] = [3, 1.4, 1.4, 3, 14, 15.6, 15.6, 15.6, 15.6, 15.6, 15.6, 14];  // crd Y
+  fctY1 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+  fctY2 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+  fctY3 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Middle Position
+  fctX0 [1] = [1.4, 3, 7, 8.6, 8.6, 7, 6, 6.5, 4.5, 4, 3, 1.4];  // crd X
+  fctX1 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+  fctX2 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+  fctX3 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // char Width Factor
+
+    };
+
+
+// ------------------------------------------------------------------
+// Bell
+// Нужно определить колокольчику 
+// hatch Width (легко изменять толщину колокольчика по X и Y), 
+// hatch Space (расстояние между скобками), 
+// char Width Factor (сделать аналогично мастабированию...)
+
+    if (chrCode[0] == 7) {
+      maxHatch = 6; maxPoint = 20; 
+
+// Outer bell
+      fctY0 [0] = [5, 8.5, 11.0, 12.8, 13.9, 14.6, 15, 15, 14.6, 13.9, 12.8, 11.0, 8.5, 5, 5, 4, 3.5, 3.5, 4, 5];  // crd Y
+      fctY1 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctY2 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctY3 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Middle Position
+      fctX0 [0] = [-0.5, 1, 1, 1.4, 2.1, 3.2, 4.5, 5.5, 6.8, 7.9, 8.6, 9, 9, 10.5, 6.5, 6.2, 5.5, 4.5, 3.8, 3.5];  // crd X
+      fctX1 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctX2 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctX3 [0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // char Width Factor
+// Inner bell
+      fctY0 [1] = [6.5, 8.1, 11.3, 12.1, 12.7, 13.2, 13.5, 13.5, 13.2, 12.7, 12.1, 11.3, 8.1, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5];  // crd Y
+      fctY1 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctY2 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctY3 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Middle Position
+      fctX0 [1] = [1.8, 2.5, 2.5, 2.7, 3.2, 3.9, 4.6, 5.4, 6.1, 6.8, 7.2, 7.5, 7.5, 8.3, 6.5, 6, 5.5, 4.5, 4, 3.5];  // crd X
+      fctX1 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctX2 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctX3 [1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // char Width Factor
+
+// Outer ')'
+      fctY0 [2] = [17, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 1, 3, 4.6, 6.3, 8.5, 9.5, 11.7, 13.4, 15];  // crd Y
+      fctY1 [2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctY2 [2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctY3 [2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Middle Position
+      fctX0 [2] = [12, 13, 14.6, 15.7, 16.4, 16.7, 16.7, 16.4, 15.7, 14.6, 13, 12, 13.6, 14.3, 15, 15.3, 15.3, 15, 14.3, 13.6];  // crd X
+      fctX1 [2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctX2 [2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctX3 [2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // char Width Factor
+// Inner ')'
+      fctY0 [3] = [15, 16, 14.9, 13, 11, 9.5, 8.5, 7, 5, 3.1, 2, 3, 4.1, 6, 7.5, 8.8, 9.2, 10.5, 12, 13.9];  // crd Y
+      fctY1 [3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctY2 [3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctY3 [3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Middle Position
+      fctX0 [3] = [10, 11, 11.9, 13, 13.7, 13.9, 13.9, 13.7, 13, 11.9, 11, 10, 10.9, 12, 12.4, 12.5, 12.5, 12.4, 12, 10.9];  // crd X
+      fctX1 [3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctX2 [3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctX3 [3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // char Width Factor
+
+// Outer '('
+      fctY0 [4] = [17, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 1, 3, 4.6, 6.3, 8.5, 9.5, 11.7, 13.4, 15];  // crd Y
+      fctY1 [4] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctY2 [4] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctY3 [4] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Middle Position
+      fctX0 [4] = [-2, -3, -4.6, -5.7, -6.4, -6.7, -6.7, -6.4, -5.7, -4.6, -3, -2, -3.6, -4.3, -5, -5.3, -5.3, -5, -4.3, -3.6];  // crd X
+      fctX1 [4] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctX2 [4] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctX3 [4] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // char Width Factor
+// Inner '('
+      fctY0 [5] = [15, 16, 14.9, 13, 11, 9.5, 8.5, 7, 5, 3.1, 2, 3, 4.1, 6, 7.5, 8.8, 9.2, 10.5, 12, 13.9];  // crd Y
+      fctY1 [5] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctY2 [5] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctY3 [5] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Middle Position
+      fctX0 [5] = [0, -1, -1.9, -3, -3.7, -3.9, -3.9, -3.7, -3, -1.9, -1, 0, -0.9, -2, -2.4, -2.5, -2.5, -2.4, -2, -0.9];  // crd X
+      fctX1 [5] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Width
+      fctX2 [5] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // hatch Space
+      fctX3 [5] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // char Width Factor
+
+    };
+
+
+// ------------------------------------------------------------------
+// Triangle left
+    if (chrCode[0] == 8) {
+      maxHatch = 1; maxPoint = 3; 
+
+  fctY0 [0] = [9, 15, 3];
+  fctY1 [0] = [0, 0, 0];
+  fctY2 [0] = [0, 0, 0];
+  fctY3 [0] = [0, 0, 0];
+  fctX0 [0] = [2, 7, 7];
+  fctX1 [0] = [0, 0, 0];
+  fctX2 [0] = [0, 0, 0];
+  fctX3 [0] = [0, 1, 1];
+
+    };
+
+// ------------------------------------------------------------------
+// Triangle right
+    if (chrCode[0] == 9) {
+      maxHatch = 1; maxPoint = 3; 
+
+  fctY0 [0] = [15, 9, 3];
+  fctY1 [0] = [0, 0, 0];
+  fctY2 [0] = [0, 0, 0];
+  fctY3 [0] = [0, 0, 0];
+  fctX0 [0] = [3, 8, 3];
+  fctX1 [0] = [0, 0, 0];
+  fctX2 [0] = [0, 0, 0];
+  fctX3 [0] = [0, 1, 0];
+
+    };
+
+
+
+// ------------------------------------------------------------------
+// Math.ceil ()
+
+    for (i = 0; i <= maxHatch - 1; i++) {
+      for (j = 0; j <= maxPoint - 1; j++) {
+        crdY[j] = 
+          chrCrdY - (chrSize / 18) * fctY0 [i] [j] + 
+          hatchWidth * fctY1 [i] [j] + 
+          hatchSpace * fctY2 [i] [j] +
+          hatchMidPos * fctY3 [i] [j];
+        crdX[j] = 
+          chrCrdX + (chrWidth / 10) * fctX0 [i] [j] + 
+          (chrCrdY - crdY[j]) / angle + 
+          hatchWidth * fctX1 [i] [j] + 
+          hatchSpace * fctX2 [i] [j] + 
+          (unit * charWidthFactor) * fctX3 [i] [j];
+      };
+  
+      if (chrCode[i] == 0) htcColor = colorDark;
+        else if (chrCode[i] != -1) htcColor = chrAlpha;
+          else htcColor = 'rgba(0, 0, 0, 0)';
+  
+      ctx.fillStyle = htcColor;
+      //ctx.strokeStyle = htcColor;
+
+      if (chrCode[0] == 6 && i == 1 || chrCode[0] == 7 && i == 1) ctx.fillStyle = backgroundColor;
+      ctx.beginPath();
+        ctx.moveTo(crdX[0], crdY[0]);
+        for (j = 1; j <= maxPoint - 1; j++) {
+          ctx.lineTo(crdX[j], crdY[j]);
+        }
+
+        ctx.closePath();
+      //ctx.stroke();
+        ctx.fill();
+
+    };
+
+  } else {
+
+  };
+
+};
+
+
+
+// ------------------------------------------------------------------
+//	BUILD CLOCK
+// ------------------------------------------------------------------
+
+var buildClock = function () {
+
+// ------------------------------------------------------------------
+// Week Days
+
+  if (firsWeekDay == 0) weekDays = '= SUN MON TUE WED THU FRI SAT *';
+
+  for (var g = 0; g <= 31; g++) {
+    if (g >= (weekDay - firsWeekDay) * 4 + 2 && 
+        g <= weekDay * 4 + 2 - firsWeekDay * 4 + 2 || 
+	firsWeekDay == 1 && weekDay == 0 && 
+        g >= 26) weekDayAlpha = colorLight;
+    else weekDayAlpha = colorDim;
+    if (g == 0 || g == 30) weekDayAlpha = colorLight;
+
+    charSpace = charWidth (chrSizeSmall) / 50 * charSpaceFactor;
+
+    chrDraw(weekDays.charAt(g),
+            screenCenterX - (charWidth (chrSizeSmall) + charSpace) * 15.5 + 
+              (charWidth (chrSizeSmall) + charSpace) * g, 
+            screenCenterY - chrSizeBig / 1.4, 
+            chrSizeSmall, weekDayAlpha);
+  };
+
+
+// ------------------------------------------------------------------
+// Time
+
+  if (timeStandard == 1 && hours > 12) {
+    hours = hours - 12; hoursString = hours + '';
+    midDay = 'PM';
+  } else midDay = 'AM';
+
+  if (timeStandard == 1 && hours <= 0) {
+    hoursString = '12';
+    midDay = 'PM';
+  } else if (hours <= 0) hoursString = '00';
+
+  if (hoursString.length == 1) hoursString = '0' + hoursString;
+  if (minutesString.length == 1) minutesString = '0' + minutesString;
+
+  charSpace = charWidth (chrSizeBig) / 50 * charSpaceFactor;
+
+  if (dotsStyle == 0) blinkColor = colorDark;
+  if (dotsStyle == 1) blinkColor = colorLight;
+  if (dotsStyle == 3) {
+    if (seconds % 2 != 0) blinkColor = colorLight;
+      else blinkColor = colorDark; 
+  };
+
+  clockDrawData = [
+    // Distances
+    2.8, 1.8, 1.0, 0.2, -0.8, 
+    // Characters
+    hoursString.charAt(0), hoursString.charAt(1), ':', 
+    minutesString.charAt(0), minutesString.charAt(1),
+    // Colors
+    colorLight, colorLight, blinkColor, colorLight, colorLight]; 
+
+  for (var g = 0; g <= 4; g++) {
+    chrDraw(clockDrawData [g + 5],
+            screenCenterX - (charWidth (chrSizeBig) + charSpace) * clockDrawData [g],
+            screenCenterY + chrSizeBig / 2, 
+            chrSizeBig, clockDrawData [g + 10]);
+  };
+
+    blinkColor = colorLight;
+
+
+// ------------------------------------------------------------------
+// PM or AM
+
+  charSpace = charWidth (chrSizeMid) / 50 * charSpaceFactor;
+
+  if (timeStandard == 0) customColor = colorDark;
+    else customColor = colorLight;
+
+  for (var g = 0; g <= 1; g++) {
+    chrDraw(midDay.charAt(g),
+            screenCenterX - (charWidth (chrSizeMid) + charSpace) * (-5.0 - g),
+            screenCenterY - chrSizeMid * 0.2, 
+            chrSizeMid, customColor);
+};
+
+
+// ------------------------------------------------------------------
+// Seconds
+
+  if (secondsString.length == 1) secondsString = "0" + secondsString;
+
+  if (secondsStyle == 0) customColor = colorDark;
+    else customColor = colorLight;
+
+  for (var g = 0; g <= 1; g++) {
+    chrDraw(secondsString.charAt(g),
+            screenCenterX - (charWidth (chrSizeMid) + charSpace) * (-4.85 - g),
+            screenCenterY + chrSizeMid * 1.2, 
+            chrSizeMid, customColor);
+  };
+
+
+// ------------------------------------------------------------------
+// Date
+
+  charSpace = charWidth (chrSizeSmall) / 50 * charSpaceFactor;
+
+  if (monthLetter == 1) monthString = monthes[month - 1];
+  if (yearStandard == 0) yearString = yearString.charAt(2) + yearString.charAt(3);
+  if (monthStandard == 0) strData = dayString + '/' + monthString + '/' + yearString;
+    else  strData = monthString + '/' + dayString + '/' + yearString;
+
+  for (var g = 0; g <= strData.length - 1; g++) {
+    chrDraw (strData.charAt(strData.length - 1 - g), 
+              screenCenterX + (charWidth (chrSizeSmall) + charSpace) * 14 - (charWidth (chrSizeSmall) + charSpace) * g, 
+              screenCenterY + chrSizeSmall * 5.1, 
+              chrSizeSmall, colorLight);
+  };
+
+
+
+// ------------------------------------------------------------------
+// Alarm clock
+
+if (timeStandard == 0) var chrArr = ['@', '!', '0', '8', ':', '0', '0', '!', '_', '_'];
+  else var chrArr = ['@', '!', '0', '8', ':', '0', '0', '!', 'A', 'M'];
+
+  if (alarmClock == 1) customColor = colorLight;
+    else customColor = colorDim;
+
+for (var g = 0; g <= 9; g++) {
+  chrDraw (chrArr[g], 
+            screenCenterX - (charWidth (chrSizeSmall) + charSpace) * 15 + (charWidth (chrSizeSmall) + charSpace) * g, 
+            screenCenterY + chrSizeSmall * 5.1, 
+            chrSizeSmall, customColor);
+};
+
+
+};
+
+
+
+// ------------------------------------------------------------------
+//	TEST FONT
+// ------------------------------------------------------------------
+
+var testFont = function () {
+
+  charSpace = charWidth (chrSizeMid) / 50 * charSpaceFactor;
+  
+  for (var g = 0; g <= 9; g++) {
+    chrDraw (g, screenCenterX - chrSizeMid/ 9 * 5 * 7 + g * chrSizeMid/ 9 * 6, screenCenterY - chrSizeMid * 1.8, chrSizeMid, colorLight);
+  };
+  var chrArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
+  for (var g = 0; g <= 12; g++) {
+    chrDraw (chrArr[g], screenCenterX - chrSizeMid/ 9 * 5 * 7 + g * chrSizeMid/ 9 * 6, screenCenterY - chrSizeMid * 0.6, chrSizeMid, colorLight);
+  };
+  chrArr = ['N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+  for (var g = 0; g <= 12; g++) {
+    chrDraw (chrArr[g], screenCenterX - chrSizeMid/ 9 * 5 * 7 + g * chrSizeMid/ 9 * 6, screenCenterY + chrSizeMid * 0.6, chrSizeMid, colorLight);
+  };
+  chrArr = ['=', '_', '.', '(', '$', ')', '-', '"', '`', '?', '!', '#', '_'];
+  for (var g = 0; g <= 12; g++) {
+    chrDraw (chrArr[g], screenCenterX - chrSizeMid/ 9 * 5 * 7 + g * chrSizeMid/ 9 * 6, screenCenterY + chrSizeMid * 1.8, chrSizeMid, colorLight);
+  };
+  chrArr = ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_'];
+  for (var g = 0; g <= 12; g++) {
+    chrDraw (chrArr[g], screenCenterX - chrSizeMid/ 9 * 5 * 7 + g * chrSizeMid/ 9 * 6, screenCenterY + chrSizeMid * 3.0, chrSizeMid, alphaFactor);
+  };
+  chrArr = [':', '/', '^', '*', '%', '!', '@', '!', '!', '@', '!', '<', '>'];
+  for (var g = 0; g <= 12; g++) {
+    chrDraw (chrArr[g], screenCenterX - chrSizeMid/ 9 * 5 * 7 + g * chrSizeMid/ 9 * 6, screenCenterY + chrSizeMid * 3.0, chrSizeMid, colorLight);
+  };
+
+};
+
+
+// ------------------------------------------------------------------
+//	MAIN FUNCTION
+// ------------------------------------------------------------------
+
+var mainLoop = setInterval(function () {
+
+  reloadVariables ();
+  clearScreen ();
+
+  //testFont ();
+  buildClock ();
+
+
+
+/*
+canvas.onclick = function () {
+launchFullScreen(canvas);
+//onFullScreenChange();
+};
+*/
+
+
+}, 20);
+
+// ------------------------- END OF SCRIPT --------------------------
+
+
+</script>
+<!-- END JavaScript -->
+</body>
+</html>
+
+
